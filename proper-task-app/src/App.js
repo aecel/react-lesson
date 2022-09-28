@@ -11,13 +11,20 @@ class App extends Component {
       task: {
         text: "",
         id: uniqid(),
+        num: 1,
+        beingEdited: false,
       },
     }
   }
 
   handleChange = (e) => {
     this.setState({
-      task: { text: e.target.value, id: this.state.task.id },
+      task: {
+        text: e.target.value,
+        id: this.state.task.id,
+        num: this.state.task.num,
+        beingEdited: false,
+      },
     })
   }
 
@@ -28,16 +35,93 @@ class App extends Component {
       task: {
         text: "",
         id: uniqid(),
+        num: this.state.task.num + 1,
+        beingEdited: false,
       },
     })
   }
 
-  render() {
+  onClickDelete = (taskToDelete) => {
+
+    this.setState({
+      tasks: this.state.tasks.filter((task) => {
+        return taskToDelete.id !== task.id
+      }),
+    })
+  }
+
+  onClickEdit = (task) => {
+    console.log(task)
+
+    const currentState = this.state
+
+    const nextTasks = []
+
+    for (const existingTask of currentState.tasks) {
+      // is this the task we want to edit?
+      if (existingTask.id === task.id) {
+        existingTask.beingEdited = true
+      }
+
+      nextTasks.push(existingTask)
+    }
+
+    this.setState({
+      tasks: nextTasks,
+    })
+  }
+
+  onTodoTextEdit = (task, newText) => {
+    
+    const currentState = this.state
+
+    const nextTasks = []
+
+    for (const existingTask of currentState.tasks) {
+      // is this the task we want to edit?
+      if (existingTask.id === task.id) {
+        existingTask.text = newText
+      }
+
+      nextTasks.push(existingTask)
+    }
+
+    this.setState({
+      tasks: nextTasks,
+    })
+  }
+  
+  onClickResubmit = (task) => {
+    const currentState = this.state
+
+    const nextTasks = []
+
+    for (const existingTask of currentState.tasks) {
+      // is this the task we want to edit?
+      if (existingTask.id === task.id) {
+        existingTask.beingEdited = false
+      }
+
+      nextTasks.push(existingTask)
+    }
+
+    this.setState({
+      tasks: nextTasks,
+    })
+  }
+
+  render = () => {
     const { tasks, task } = this.state
 
     return (
       <div>
-        <Overview tasks={tasks} />
+        <Overview
+          tasks={tasks}
+          clickDelete={this.onClickDelete}
+          clickEdit={this.onClickEdit}
+          onTodoTextEdit={this.onTodoTextEdit}
+          clickResubmit={this.onClickResubmit}
+        />
         <form onSubmit={this.onSubmitTask}>
           <label htmlFor="taskInput">Enter task</label>
           <input
